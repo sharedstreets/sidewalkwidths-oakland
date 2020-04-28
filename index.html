@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Sidewalk Widths Oakland</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<link rel='icon' href='favicon.ico?' type='image/x-icon'/ >
+<script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css" rel="stylesheet" />
+
+<style>
+	body {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+  }
+	#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+		background-color: #03070d;
+  }
+  #info {
+    position: fixed;
+    width: 80%;
+    max-width: 400px;
+    height: 80%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px;
+    color: #c9d3d9;
+    background-color: #0b0d13;
+    z-index: 1000;
+    border-radius: 20px;
+  }
+  #info-content {
+    width: 100%;
+    height: 80%;
+    overflow: auto;
+    font-size: 1em;
+  }
+  #info-content h1 {
+    margin-top: 0;
+  }
+  #info-content h3 {
+    margin-bottom: 0;
+  }
+  #info-content p {
+    width: 100%;
+    overflow: auto;
+  }
+  #info-button {
+    height: 50px;
+    padding: 1em;
+    text-align: center;
+  }
+  #info-button button {
+    padding: 0.5em;
+    color: #c9d3d9;
+    font-size: 1.25em;
+    font-weight: bold;
+    background-color: #2f5994;
+    outline: 0;
+    border: 0;
+    border-radius: 10px;
+  }
+  #info-button button:hover {
+    background-color: #a99521;
+    transition: 0.1s ease-in-out;
+  }
+  #open-info {
+    position: fixed;
+    background-color: #2f5994;
+    margin-left: 10px;
+    margin-top: 10px;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    outline: 0;
+    border: 0;
+    border-radius: 20px;
+    z-index: 2000;
+  }
+  #open-info h2 {
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    color: #cfedff;
+    margin-top: 8px;
+  }
+  #open-info:hover {
+    background-color: #a99521;
+    transition: 0.1s ease-in-out;
+  }
+	a:link {
+		color: #3d77ca;
+		text-decoration: none;
+	}
+	a:visited {
+		color: #3d77ca;
+		text-decoration: none;
+	}
+	a:hover {
+		color: #a99521;
+	  text-decoration: underline;
+	}
+	a:active {
+		color: #a99521;
+	  text-decoration: underline;
+	}
+	.mapboxgl-ctrl-group {
+    background: #2f5994;
+	}
+	.mapboxgl-ctrl-group button+button {
+    border-top: 1px solid #000;
+	}
+	.mapboxgl-ctrl button:not(:disabled):hover {
+    background-color: #a99521;
+		transition: 0.1s ease-in-out;
+	}
+	.mapboxgl-ctrl button.mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='29' height='29' viewBox='0 0 29 29' xmlns='http://www.w3.org/2000/svg' fill='white'%3E%3Cpath d='M14.5 8.5c-.75 0-1.5.75-1.5 1.5v3h-3c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h3v3c0 .75.75 1.5 1.5 1.5S16 19.75 16 19v-3h3c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13h-3v-3c0-.75-.75-1.5-1.5-1.5z'/%3E%3C/svg%3E");
+	}
+	.mapboxgl-ctrl button.mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='29' height='29' viewBox='0 0 29 29' xmlns='http://www.w3.org/2000/svg' fill='white'%3E%3Cpath d='M10 13c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h9c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13h-9z'/%3E%3C/svg%3E");
+	}
+	.mapboxgl-ctrl button.mapboxgl-ctrl-compass .mapboxgl-ctrl-icon {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='29' height='29' viewBox='0 0 29 29' xmlns='http://www.w3.org/2000/svg' fill='white'%3E%3Cpath d='M10.5 14l4-8 4 8h-8z'/%3E%3Cpath d='M10.5 16l4 8 4-8h-8z' fill='black'/%3E%3C/svg%3E");
+	}
+  .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+    border-top-color: #03070d;
+  }
+  .mapboxgl-popup-content {
+    color: white;
+    font-weight: bold;
+    background-color: #03070d;
+    border: 1px solid white;
+    border-radius: 10px;
+    box-shadow: 0px 3px 10px rgba(0, 0, 0, .8);
+  }
+  .mapboxgl-popup-content .name {
+    margin: 0;
+    margin-bottom: 0.5em;
+  }
+  .mapboxgl-popup-content .width {
+    margin: 0;
+    margin-bottom: 0.2em;
+    font-size: 2.5em;
+  }
+  .mapboxgl-popup-content .message {
+    margin: 0;
+    margin-bottom: 0.2em;
+    font-size: 1.5em;
+  }
+
+</style>
+</head>
+<body>
+
+  <div id="info">
+    <div id="info-content">
+      <h3>Welcome to</h3>
+      <h1>Sidewalk Widths Oakland</h1>
+			<p>This map is intended to give an overall impression of how sidewalk widths impact the ability of pedestrians to practice social distancing, and how the <a href="https://www.oaklandca.gov/projects/oakland-slow-streets">Oakland Slow Streets</a> program affects this.</p>
+			<br/>
+      <p><small>DATA SOURCES AND DISCLAIMER<br/>
+			<p>This map uses best-available city datasets but has important limitations. Slow Streets locations were obtained from the <a href="https://www.arcgis.com/home/webmap/viewer.html?webmap=b2f8989fdb514d2fb511067a11ad65f0&extent=-122.2964,37.7837,-122.1887,37.8461">City of Oakland's online map viewer</a> and are accurate as of April 27. Widths were taken from Oakland's most recent sidewalk inventory in 2006, provided by city staff. This source data is somewhat dated, doesn't account for variation along each blockface, and was not verfied for accuracy or completeness.
+			<br/><br/>
+      Do not use this map to make decisions that impact your health or safety. Other important factors like sidewalk obstructions, population density, and pedestrian activity are not accounted for in this dataset. Local knowledge and other information are critical for making decisions about using and managing city streets.</p>
+			<p>This map was inspired by <a href="http://www.sidewalkwidths.nyc/">Sidewalk Widths NYC</a>.
+		</small></p>
+    </div>
+    <div id="info-button" onclick="closeInfo()">
+      <button>Explore the Map</button>
+    </div>
+  </div>
+
+  <button id="open-info" onclick="openInfo()">
+    <h2>i</h2>
+  </button>
+
+  <div id="map"></div>
+
+  <script>
+
+  function closeInfo() {
+    var x = document.getElementById("info");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+  }
+
+  function openInfo() {
+    var x = document.getElementById("info");
+    if (x.style.display === "block") {
+      x.style.display = "none";
+    } else {
+      x.style.display = "block";
+    }
+  }
+
+	mapboxgl.accessToken = 'pk.eyJ1IjoidHJhbnNwb3J0cGFydG5lcnNoaXAiLCJhIjoiY2s5ZW9kZnR5MDJpNjNtcDRzaDRoaW5vdyJ9.88UoaHJBnCDoIqT05XsJvA';
+  var map = new mapboxgl.Map({
+    container: 'map',
+		style: 'mapbox://styles/transportpartnership/ck9eobamu2ojb1io1yppz1uhn',
+		center: [-122.26877, 37.80302],
+    zoom: 13.7,
+  	maxZoom: 22,
+  	minZoom: 12,
+		maxBounds: [
+			[-122.325, 37.719], // Southwest coordinates
+			[-122.127, 37.874] // Northeast coordinates
+		],
+		hash: true
+  });
+
+	map.addControl(new mapboxgl.NavigationControl());
+
+  map.on('load', function() {
+    // Insert the layer beneath any symbol layer.
+    var labelLayerId = "road-label";
+
+		map.addSource('sidewalks', {
+			 type: 'vector',
+			 url: 'mapbox://transportpartnership.dbc0nb2g'
+		});
+
+    map.addLayer({
+      'id': 'sidewalks',
+      'type': 'line',
+      'source': 'sidewalks',
+			'source-layer': 'slowstreets-oakland-dr9m5x',
+			'minzoom': 12,
+      'layout': {
+        'line-cap': 'round',
+				'line-join': 'round'
+      },
+			"paint": {
+					"line-color": [
+							"step",
+							["get", "width_base"],
+							"hsl(0, 85%, 40%)",
+							6,
+							"hsl(31, 87%, 45%)",
+							9,
+							"hsl(55, 80%, 56%)",
+							12,
+							"hsl(83, 88%, 44%)",
+							16,
+							"hsl(130, 69%, 41%)",
+							20,
+							"#2ea5e5",
+							87.6,
+							"hsl(212, 81%, 44%)"
+					],
+					"line-width": [
+							"interpolate",
+							["linear"],
+							["zoom"],
+							13,
+							0.8,
+							15,
+							2.5,
+							16,
+							4,
+							20,
+							14
+					],
+					"line-opacity": 0.96
+			}
+    },
+    labelLayerId
+    );
+
+		map.addSource('slowstreets', {
+			 type: 'vector',
+			 url: 'mapbox://transportpartnership.dcvlk96s'
+		});
+
+		map.addLayer({
+      'id': 'slowstreets',
+      'type': 'line',
+      'source': 'slowstreets',
+			'source-layer': 'slowstreets-oakland-0w4en5',
+      'layout': {
+        'line-cap': 'round',
+      },
+			"paint": {
+					"line-color": [
+							"match",
+							["get", "Impl_1"],
+							["17-Apr", "11-Apr"],
+							"hsla(186, 92%, 50%, 0.9)",
+							"hsla(186, 92%, 50%, 0.45)"
+					],
+					"line-width": [
+							"interpolate",
+							["linear"],
+							["zoom"],
+							13,
+							3.5,
+							15,
+							4.8,
+							16,
+							7,
+							18,
+							14,
+							20,
+							24
+					]
+			}
+	},
+    labelLayerId
+    );
+
+
+    map.addLayer(
+      {
+        'id': '3d-buildings',
+        'source': 'composite',
+        'source-layer': 'building',
+        'filter': ['==', 'extrude', 'true'],
+        'type': 'fill-extrusion',
+        'minzoom': 16,
+        'paint': {
+        'fill-extrusion-color': '#1f2432',
+        'fill-extrusion-height': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          16, 0,
+          16.05, ['get', 'height']
+        ],
+        'fill-extrusion-base': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          16, 0,
+          16.05, ['get', 'min_height']
+        ],
+        'fill-extrusion-opacity': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          16, 0.4,
+          17, 0.95
+        ]
+      }
+    },
+    labelLayerId
+    );
+
+    var popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    function addPopup(e) {
+
+      map.getCanvas().style.cursor = 'pointer';
+
+      var lineWidth = e.features[0].properties.width_base
+			var slowStatus = e.features[0].properties.slowstreet
+      var lineColor = e.features[0].layer.paint['line-color']
+      var coordinates = e.lngLat;
+
+			if (slowStatus == 1) {
+        var message = 'However, this street is part of Slow Streets. It should be great for social distancing!'
+        var lineColor = '#0addf5'
+			} else if (lineWidth < 1) {
+	        var message = 'This street does not have a sidewalk.'
+	        var lineColor = '#961113'
+      } else if (lineWidth >= 1 && lineWidth < 6) {
+        var message = 'This path is too narrow for social distancing.'
+        var lineColor = '#bd0f0f'
+      } else if (lineWidth >= 6 && lineWidth < 9) {
+        var message = 'This path is too narrow for social distancing.'
+        var lineColor = '#d7760f'
+      } else if (lineWidth >= 9 && lineWidth < 12) {
+        var message = 'Social distancing may be difficult on this path.'
+        var lineColor = '#e9da35'
+			} else if (lineWidth >= 12 && lineWidth < 16) {
+				var message = 'Social distancing should be possible on this path.'
+				var lineColor = '#87d30d'
+			} else if (lineWidth >= 16 && lineWidth < 20) {
+				var message = 'Social distancing should be easy on this path.'
+				var lineColor = '#20b138'
+      } else {
+        var message = 'This path is great for social distancing!'
+        var lineColor = '#2ea5e5'
+      }
+
+			if (slowStatus == 2) {
+				var message = message + ' However, this street is being considered for Slow Streets. If added, it should be great for social distancing.'
+			}
+
+      var description = (
+        '<div class="name">Sidewalk Width:</div>' +
+				'<div class="width">' + Math.round(lineWidth * 10) / 10) + ' ft</div>' +
+        '<div class="message">' + message + '</div>'
+
+      popup.setLngLat(coordinates)
+      popup.setHTML(description)
+      popup.addTo(map)
+
+      popup._content.style.color = lineColor
+      popup._content.style.borderColor = lineColor
+
+			if (popup._tip.offsetParent.className.includes('mapboxgl-popup-anchor-bottom')) {
+				popup._tip.style.borderTopColor = lineColor
+			}
+			if (popup._tip.offsetParent.className.includes('mapboxgl-popup-anchor-top')) {
+	      popup._tip.style.borderBottomColor = lineColor
+			}
+			if (popup._tip.offsetParent.className.includes('mapboxgl-popup-anchor-right')) {
+				popup._tip.style.borderLeftColor = lineColor
+			}
+			if (popup._tip.offsetParent.className.includes('mapboxgl-popup-anchor-left')) {
+				popup._tip.style.borderRightColor = lineColor
+			}
+
+      popup.addTo(map)
+    }
+
+    map.on('touchstart', 'sidewalks', function(e) {
+      addPopup(e);
+    })
+
+    map.on('mousemove', 'sidewalks', function(e) {
+      addPopup(e);
+    });
+
+    map.on('mouseleave', 'sidewalks', function() {
+      map.getCanvas().style.cursor = '';
+      popup.remove();
+    });
+
+  });
+
+  </script>
+
+</body>
+</html>
